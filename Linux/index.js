@@ -1,11 +1,10 @@
 const q = require('quote-unquote');
-const { spawnSync } = require('child_process');
+const { get_stdout } = require("../utils");
 const kde = require("./kde");
 const lxde = require("./lxde");
 
 function get_wallpaper() {
     const desktop = process.env.XDG_CURRENT_DESKTOP;
-
     if (is_gnome_compliant(desktop)) {
         return parse_dconf(
             "gsettings",
@@ -14,16 +13,16 @@ function get_wallpaper() {
     }
 
     const matcher = {
-        "KDE": kde.get(),
-        "X-Cinnamon" : parse_dconf(
+        "KDE": () => kde.get(),
+        "X-Cinnamon" : () => parse_dconf(
             "dconf",
             ["read", "/org/cinnamon/desktop/background/picture-uri"],
         ),
-        "MATE": parse_dconf(
+        "MATE": () => parse_dconf(
             "dconf",
             ["read", "/org/mate/desktop/background/picture-filename"],
         ),
-        "XFCE": get_stdout(
+        "XFCE": () => get_stdout(
             "xfconf-query",
             [
                 "-c",
@@ -32,8 +31,8 @@ function get_wallpaper() {
                 "/backdrop/screen0/monitor0/workspace0/last-image",
             ],
         ),
-        "LXDE": lxde.get(),
-        "Deepin": parse_dconf(
+        "LXDE": () => lxde.get(),
+        "Deepin": () => parse_dconf(
             "dconf",
             [
                 "read",
@@ -41,7 +40,12 @@ function get_wallpaper() {
             ],
         ),
     }
-    return matcher[desktop];
+    console.log("aa", matcher[desktop]);
+    if(matcher[desktop]){
+        return matcher[desktop]();
+    } else {
+        throw new Error(`unsupported desktop ${desktop}`)
+    }
 }
 
 function is_gnome_compliant(desktop) {
@@ -50,21 +54,12 @@ function is_gnome_compliant(desktop) {
 
 
 function parse_dconf(command, args) {
-    const stdout = q.unquote(get_stdout(command, args));
+    const out = get_stdout(command, args);
+    const stdout = q.unquote(out);
     if (stdout.starts_with("file://")) {
         stdout = stdout.substring(7);
     }
     return stdout;
-}
-
-
-function get_stdout(command, args) {
-    let output = spawnSync(command, args);
-    if(output.status === 0) {
-        return output.toString('utf-8')
-    } else {
-        throw new Error("failed to run command")
-    }
 }
 
 console.log(get_wallpaper())
