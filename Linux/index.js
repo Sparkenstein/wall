@@ -1,5 +1,7 @@
 const q = require('quote-unquote');
 const { spawnSync } = require('child_process');
+const kde = require("./kde");
+const lxde = require("./lxde");
 
 function get_wallpaper() {
     const desktop = process.env.XDG_CURRENT_DESKTOP;
@@ -10,10 +12,40 @@ function get_wallpaper() {
             ["get", "org.gnome.desktop.background", "picture-uri"],
         );
     }
+
+    const matcher = {
+        "KDE": kde.get(),
+        "X-Cinnamon" : parse_dconf(
+            "dconf",
+            ["read", "/org/cinnamon/desktop/background/picture-uri"],
+        ),
+        "MATE": parse_dconf(
+            "dconf",
+            ["read", "/org/mate/desktop/background/picture-filename"],
+        ),
+        "XFCE": get_stdout(
+            "xfconf-query",
+            [
+                "-c",
+                "xfce4-desktop",
+                "-p",
+                "/backdrop/screen0/monitor0/workspace0/last-image",
+            ],
+        ),
+        "LXDE": lxde.get(),
+        "Deepin": parse_dconf(
+            "dconf",
+            [
+                "read",
+                "/com/deepin/wrap/gnome/desktop/background/picture-uri",
+            ],
+        ),
+    }
+    return matcher[desktop];
 }
 
 function is_gnome_compliant(desktop) {
-    return desktop.contains("GNOME") || desktop == "Unity" || desktop == "Pantheon"
+    return desktop.includes("GNOME") || desktop == "Unity" || desktop == "Pantheon"
 }
 
 
@@ -34,3 +66,5 @@ function get_stdout(command, args) {
         throw new Error("failed to run command")
     }
 }
+
+console.log(get_wallpaper())
