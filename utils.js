@@ -9,4 +9,8 @@ function get_stdout(command, args) {
     }
 }
 
-module.exports = { get_stdout };
+function run(command, args) {
+    get_stdout(command, args);
+}
+
+module.exports = { get_stdout, run };

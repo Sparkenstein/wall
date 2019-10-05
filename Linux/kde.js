@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
 const q = require('quote-unquote');
-
+const { run } = require('../utils');
 
 function get() {
     let p = path.join(getConfigHome(), "plasma-org.kde.plasma.desktop-appletsrc");
@@ -38,15 +38,11 @@ for (var i = 0; i < monitors.length; i++) {{
     monitors[i].currentConfigGroup = ["Wallpaper"]
     monitors[i].writeConfig("Image", {})
 }}
-${q.quote(`file://${path}`)}
+${q.double(`file://${path}`)}
 `,
             ),
         ],
     )
-}
-
-function run(command, args) {
-    get_stdout(command, args);
 }
 
 
