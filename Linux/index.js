@@ -1,4 +1,5 @@
 const q = require('quote-unquote');
+const { spawnSync } = require('child_process');
 
 function get_wallpaper() {
     const desktop = process.env.XDG_CURRENT_DESKTOP;
@@ -22,4 +23,14 @@ function parse_dconf(command, args) {
         stdout = stdout.substring(7);
     }
     return stdout;
+}
+
+
+function get_stdout(command, args) {
+    let output = spawnSync(command, args);
+    if(output.status === 0) {
+        return output.toString('utf-8')
+    } else {
+        throw new Error("failed to run command")
+    }
 }
