@@ -1,7 +1,7 @@
 const q = require("quote-unquote");
 const { get_stdout, run, download_image } = require("../utils");
 
-function get() {
+function get_wallpaper() {
     return get_stdout(
         "osascript",
         [
@@ -28,4 +28,4 @@ async function set_from_url(url) {
     set_from_path(path)
 }
 
-module.exports = { get, set_from_path, set_from_url }
+module.exports = { get_wallpaper, set_from_path, set_from_url }
