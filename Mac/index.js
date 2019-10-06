@@ -2,7 +2,7 @@ const q = require("quote-unquote");
 const { get_stdout, run, download_image } = require("../utils");
 
 function get() {
-    get_stdout(
+    return get_stdout(
         "osascript",
         [
             "-e",
