@@ -163,4 +163,4 @@ async function set_from_url(url) {
     }
 }
 
-console.log(set_from_url('https://source.unsplash.com/random'))
+module.exports = { get_wallpaper, set_from_url, set_from_path }
