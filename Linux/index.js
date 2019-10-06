@@ -124,4 +124,43 @@ function set_from_path(path) {
     }
 }
 
-console.log(set_from_path('/home/spark/.config/variety/Downloaded/Unsplash/photo-1567244021256-4f4992053cd1.jpg'))
+
+function set_from_url(url) {
+    const desktop = process.env.XDG_CURRENT_DESKTOP;
+
+    const matcher = {
+        // only some GNOME-based desktops support urls for picture-uri
+        "GNOME" : () => run(
+            "gsettings",
+            [
+                "set",
+                "org.gnome.desktop.background",
+                "picture-uri",
+                q.double(url),
+            ],
+        ),
+        "ubuntu:GNOME": () => run(
+            "gsettings",
+            [
+                "set",
+                "org.gnome.desktop.background",
+                "picture-uri",
+                q.double(url),
+            ],
+        ),
+        "i3": () => run("feh", ["--bg-fill", url])
+    }
+
+    if(matcher[desktop]){
+        return matcher[desktop]()
+    } else {
+        try{
+            let path = download_image(url);
+            set_from_path(path)
+        } catch (e) {
+            console.error(e.message);
+        }
+    }
+}
+
+console.log(set_from_url('https://source.unsplash.com/random'))
