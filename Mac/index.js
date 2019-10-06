@@ -25,7 +25,6 @@ function set_from_path(path) {
 // Sets the wallpaper from a URL.
 async function set_from_url(url) {
     const path = await download_image(url);
-    console.log(path)
     set_from_path(path)
 }
 
