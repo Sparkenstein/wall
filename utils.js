@@ -18,19 +18,28 @@ function run(command, args) {
 }
 
 
-function download_image(url) {
-    let cache_dir = getCacheFolder();
-    let segments = url.split('/');
-    let file_name = segments[segments.length-1];
-    if (!file_name) {
-        file_name = "wallpaper";
-    }
+async function download_image(url) {
+    const cache_dir = getCacheFolder();
+    const res = await axios({
+        method: "GET",
+        url,
+        responseType: 'stream'
+    });
+    const finalUrl = res.data.responseUrl.split("?")[0];
+    let segments = finalUrl.split('/');
+    let file_name = segments[segments.length-1] || "wallpaper";
     let file_path = path.join(cache_dir, file_name);
-    axios.get(url).then((f) => {
-        fs.writeFileSync(file_path, f);
-        console.log("written")        
-    })
-
+    
+    let writer = fs.createWriteStream(file_path);
+    res.data.pipe(writer);
+    return new Promise((resolve, reject) => {
+        writer.on("finish", () => {
+            resolve(file_path);
+        });
+        writer.on('error', () => {
+            reject("Error in downloading or saving image");
+        });
+    });
 }
 
 module.exports = { get_stdout, run, download_image };

@@ -2,7 +2,7 @@ const q = require('quote-unquote');
 const { get_stdout } = require("../utils");
 const kde = require("./kde");
 const lxde = require("./lxde");
-const { run } = require('../utils');
+const { run, download_image } = require('../utils');
 
 
 function get_wallpaper() {
@@ -42,7 +42,6 @@ function get_wallpaper() {
             ],
         ),
     }
-    console.log("aa", matcher[desktop]);
     if(matcher[desktop]){
         return matcher[desktop]();
     } else {
@@ -125,7 +124,7 @@ function set_from_path(path) {
 }
 
 
-function set_from_url(url) {
+async function set_from_url(url) {
     const desktop = process.env.XDG_CURRENT_DESKTOP;
 
     const matcher = {
@@ -155,8 +154,9 @@ function set_from_url(url) {
         return matcher[desktop]()
     } else {
         try{
-            let path = download_image(url);
-            set_from_path(path)
+            download_image(url).then((data) => {
+                set_from_path(data);
+            }).catch(console.error);
         } catch (e) {
             console.error(e.message);
         }
